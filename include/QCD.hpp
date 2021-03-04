@@ -8,6 +8,9 @@ namespace QCD {
   constexpr double TR = 1./2.;
   constexpr double CA = NC;
   constexpr double CF = (NC*NC-1.)/2./NC;
+}
+
+using namespace QCD;
 
 class AlphaS
 {
@@ -23,7 +26,7 @@ public:
     _asmb{(*this)(_mb2)}, _asmc{(*this)(_mc2)}
   {}
 
-  ~AlphaS();
+  ~AlphaS() {}
 
   inline static double beta0(const size_t nf) {return 11./6.*CA -2./3.*TR*nf;}
   inline static double beta1(const size_t nf) {return 17./6.*CA*CA - (5./3.*CA+CF)*TR*nf;}
@@ -72,6 +75,5 @@ public:
     return (_order == 0) ? as0(t) : as1(t);
   }
 };
-}
 
 #endif

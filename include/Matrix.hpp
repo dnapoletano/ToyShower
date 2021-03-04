@@ -4,7 +4,10 @@
 #include <cmath>
 #include <random>
 
+#include "Particle.hpp"
 #include "QCD.hpp"
+#include "Random.hpp"
+
 #include "Rivet/Rivet.hh"
 
 struct EWParameters
@@ -18,8 +21,17 @@ struct EWParameters
 };
 
 struct EventInfo {
-  Rivet::Particles Particles;
-  double dxs;
+  long int EvtNumber;
+  double dxs, lome;
+  std::vector<Particle> Particles;
+  inline friend std::ostream& operator<<(std::ostream& os, EventInfo& evt){
+    os << "XS       : " << evt.dxs<<"\n";
+    os << "MEWeight : " << evt.lome << "\n";
+    for(const auto& p: evt.Particles){
+      os << p << " : " << &p << "\n";
+    }
+    return os;
+  }
 };
 
 class Matrix
@@ -27,12 +39,10 @@ class Matrix
 private:
   EWParameters _ewparams;
   const double _ecms;
-
-  std::mt19937_64 re;
-  std::uniform_real_distribution<double> urng;
+  Random* ran;
 
 public:
-  Matrix(const double& ecms);
+  Matrix(const double& ecms, Random* random);
   ~Matrix() {}
 
   double ME2(const int& flav, const double& s, const double& t) const;
