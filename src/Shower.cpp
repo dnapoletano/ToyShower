@@ -77,24 +77,36 @@ Shower::Colours Shower::MakeColours(const std::vector<int>& flavs,
                                     const Colour& colij,
                                     const Colour& colk)
 {
-  ++_c;
+  _c += 1;
   /// splitter is quark
   if(flavs[0]!=Rivet::PID::GLUON){
     if(flavs[0] > 0){
-      return {{_c,0},{colij.first,_c}};
+      return {{_c,0},{colij.first, _c}};
     } else{
       return {{0,_c},{_c,colij.second}};
     }
   } else{ /// splitter is gluon
     if(flavs[1] == Rivet::PID::GLUON){
-      return {{colij.first,0},{0,colij.second}};
+      if(colij.first == colk.second){
+        if(colij.second == colk.first and (*_ran)() > 0.5){
+          return {{colij.first, _c},{_c, colij.second}};
+        } else {
+          return {{_c, colij.second},{colij.first, _c}};
+        }
+      } else{
+        return {{colij.first, _c},{_c, colij.second}};
+      }
     } else {
-      return {{0,colij.second},{colij.first,0}};
+      if(flavs[1] > 0 ){
+        return {{colij.first, 0},{0, colij.second}};
+      } else {
+        return {{0,colij.second},{colij.first, 0}};
+      }
     }
   }
 }
 
-void Shower::Run(class EventInfo &evt, const double t) 
+void Shower::Run(class EventInfo &evt, const double t)
 {
   _c = 1;
   _tActual = t;
@@ -173,13 +185,24 @@ void Shower::SelectSplitSpect(EventInfo& evt, double& t)
 bool Shower::CheckEvent(EventInfo &evt)
 {
   Rivet::FourMomentum TotMom {0.,0.,0.,0.};
+  Colour ColSum {0,0};
   for(const auto& p : evt.Particles){
     TotMom += p.GetMomentum();
+    ColSum.first += p.GetColour().first;
+    ColSum.second += p.GetColour().second;
   }
-  std::cout <<" TotMomentum " << TotMom << std::endl;
-  if(abs(TotMom.E()) < 1.e-12 and abs(TotMom.px()) < 1.e-12 
-    and abs(TotMom.py()) < 1.e-12 and abs(TotMom.pz()) < 1.e-12) return true;
-  else return false;
+  if(abs(TotMom.E()) < 1.e-12 and abs(TotMom.px()) < 1.e-12
+    and abs(TotMom.py()) < 1.e-12 and abs(TotMom.pz()) < 1.e-12){
+    if(ColSum.first - ColSum.second == 0){
+      return true;
+    } else{
+      std::cout << ColSum << std::endl;
+      return false;
+    }
+  } else{
+    std::cout <<" TotMomentum " << TotMom << std::endl;
+    return false;
+  }
 }
 
 bool Shower::ColourConnected(const Particle& pa, const Particle& pb)
@@ -187,21 +210,3 @@ bool Shower::ColourConnected(const Particle& pa, const Particle& pb)
   return ((pa.GetColour().first > 0 and pa.GetColour().first == pb.GetColour().second) or
           (pa.GetColour().second > 0 and pa.GetColour().first == pb.GetColour().first));
 }
-
-
-
-/* /// Test main function, TODO: remove it!
-int main()
-{
-  AlphaS alphaS{1,91.1876,0.118, 4.75,1.3};
-  Random ran{0};
-  Matrix me{91.2,&ran};
-  EventInfo evt{me.GeneratePoint()};
-  std::cout << evt << std::endl;
-  std::cout << Shower::CheckEvent(evt) << std::endl;
-  Shower sh{&alphaS,&ran,1.};
-  sh.Run(evt,91.2 * 91.2);
-  std::cout << evt << std::endl;
-  std::cout << sh.CheckEvent(evt) << std::endl;
-  return 0;
-} */

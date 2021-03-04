@@ -8,7 +8,6 @@
 #include "Rivet/Rivet.hh"
 #include "Rivet/AnalysisHandler.hh"
 
-/// I have a strong fear this would have to be redone with pointers only..
 bool ToHepMCEvent(const EventInfo &evt, HepMC::GenEvent& hepevt)
 {
   hepevt.use_units(HepMC::Units::GEV, HepMC::Units::MM);
@@ -51,7 +50,7 @@ int main()
   rivet.setIgnoreBeams(true);
   rivet.addAnalyses({"ALEPH_2004_S5765862", "LL_JetRates"});
 
-  int TotEvents{100000};
+  long int TotEvents{100000};
   double totalxs{0.0}, sumW{0.0}, sumW2{0.0}, err{0.0};
 
   for (size_t i{0}; i < TotEvents; ++i){
