@@ -20,8 +20,8 @@ private:
   double _asmz, _asmb, _asmc;
 public:
   AlphaS(const size_t order=1, const double MZ=91.1876,
-         const double alphaMZ=0.118, const double mb=4.75,
-         const double mc=1.3)
+         const double alphaMZ=0.118, const double mb=4.92,
+         const double mc=1.42)
   : _order{order}, _mz2{MZ*MZ}, _mb2{mb*mb}, _mc2{mc*mc}, _asmz{alphaMZ},
     _asmb{(*this)(_mb2)}, _asmc{(*this)(_mc2)}
   {}

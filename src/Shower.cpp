@@ -29,33 +29,32 @@ Rivet::FourMomenta Shower::MakeKinematics(const double& z, const double &y,
                                           const double& phi, const Rivet::FourMomentum& pijt,
                                           const Rivet::FourMomentum& pkt) const
 {
-  //std::cout << std::setprecision(16);
+  //std::cout.precision(16);
   Rivet::FourMomentum Q {pijt + pkt};
   //std::cout << "Q : " << Q << std::endl;
   /// kt in the decay frame
   const double rkt {sqrt(Q.mass2() * y * z * (1.-z))};
   //std::cout << "rkt : " << rkt << std::endl;
   Rivet::ThreeVector vkt1 {Rivet::cross(pijt.vector3(),pkt.vector3())};
- // std::cout << " vkt1 : " << vkt1 << std::endl;
+  //std::cout << " vkt1 : " << vkt1 << std::endl;
   if(vkt1.mod() < 1.e-6){
     vkt1 = Rivet::cross(pijt.vector3(),{1.,0.,0.});
   }
   //std::cout << " vkt1 : " << vkt1 << " , " << cos(phi) << " , "<< vkt1.mod() << std::endl;
   Rivet::FourMomentum kt1 {0.0,vkt1[0],vkt1[1],vkt1[2]};
   kt1 *= (rkt * cos(phi) / kt1.vector3().mod());
- // std::cout << "kt1 : " << kt1 << std::endl;
+  //std::cout << "kt1 : " << kt1 << std::endl;
   /// Boost to CMS
-  Rivet::LorentzTransform ToCMS {};
-  ToCMS.setBetaVec(Q.betaVec());
+
+  //std::cout << "boosted pijt : " <<  Particle::Boost(Q,pijt)<< std::endl;
+
   Rivet::ThreeVector vkt2CMS {
-    Rivet::cross(ToCMS.transform(pijt).vector3(), kt1.vector3())
+    Rivet::cross((Particle::Boost(Q,pijt)).vector3(), kt1.vector3())
   };
   vkt2CMS *= rkt * sin(phi) / vkt2CMS.mod();
   //std::cout << "kt2CMS : " << vkt2CMS << std::endl;
   Rivet::FourMomentum kt2 {
-    ToCMS.inverse().transform(
-      Rivet::FourMomentum{0.0,vkt2CMS[0],vkt2CMS[1],vkt2CMS[2]}
-    )
+    Particle::BoostBack(Q,Rivet::FourMomentum{0.0,vkt2CMS[0],vkt2CMS[1],vkt2CMS[2]})
   };
   //std::cout << "kt2 : " << kt2 << std::endl;
   Rivet::FourMomentum pi {
@@ -79,20 +78,19 @@ Shower::Colours Shower::MakeColours(const std::vector<int>& flavs,
 {
   _c += 1;
   /// splitter is quark
-  if(flavs[0]!=Rivet::PID::GLUON){
+  if(flavs[0]!=21){
     if(flavs[0] > 0){
       return {{_c,0},{colij.first, _c}};
     } else{
       return {{0,_c},{_c,colij.second}};
     }
   } else{ /// splitter is gluon
-    if(flavs[1] == Rivet::PID::GLUON){
+    if(flavs[1] == 21){
       if(colij.first == colk.second){
         if(colij.second == colk.first and (*_ran)() > 0.5){
           return {{colij.first, _c},{_c, colij.second}};
-        } else {
-          return {{_c, colij.second},{colij.first, _c}};
         }
+        return {{_c, colij.second},{colij.first, _c}};
       } else{
         return {{colij.first, _c},{_c, colij.second}};
       }
@@ -136,6 +134,17 @@ void Shower::GeneratePoint(EventInfo& evt)
                                                  _dipole.spect->GetMomentum());
         Colours cols {MakeColours(_dipole.selected->get()->flavs,
                                   _dipole.split->GetColour(),_dipole.spect->GetColour())};
+        // std::cout << "\nSplitting at t : " << _tActual << "\n"
+        //           << _dipole.split->GetFlavour() << " -> "
+        //           << _dipole.selected->get()->flavs[1]
+        //           << " " << _dipole.selected->get()->flavs[2] << "\n"
+        //           << _dipole.split->GetMomentum() << " -> "
+        //           << moms[0]
+        //           << " " << moms[1] << "\n"
+        //           << _dipole.split->GetColour() << " -> "
+        //           << cols[0]
+        //           << " " << cols[1] << "\n";
+
         _dipole.split->SetColour(cols[0]);
         _dipole.split->SetFlavour(_dipole.selected->get()->flavs[1]);
         _dipole.split->SetMomentum(moms[0]);
@@ -154,14 +163,12 @@ void Shower::GeneratePoint(EventInfo& evt)
 
 void Shower::SelectSplitSpect(EventInfo& evt, double& t)
 {
-//  std::cout << evt << std::endl;
   for(Partons::iterator split{evt.Particles.begin()+2};
     split!=evt.Particles.end(); ++split){
     for(Partons::iterator spect{evt.Particles.begin()+2};
       spect!=evt.Particles.end();++spect){
       if(spect == split) continue;
       if(not ColourConnected((*split),(*spect))) continue;
-      /// select splitting function
       for(auto kern{_kernels.begin()}; kern!=_kernels.end(); ++kern){
         if(kern->get()->flavs[0] != split->GetFlavour()) continue;
         double m2 {(split->GetMomentum() + spect->GetMomentum()).mass2()};
@@ -208,5 +215,5 @@ bool Shower::CheckEvent(EventInfo &evt)
 bool Shower::ColourConnected(const Particle& pa, const Particle& pb)
 {
   return ((pa.GetColour().first > 0 and pa.GetColour().first == pb.GetColour().second) or
-          (pa.GetColour().second > 0 and pa.GetColour().first == pb.GetColour().first));
+          (pa.GetColour().second > 0 and pa.GetColour().second == pb.GetColour().first));
 }

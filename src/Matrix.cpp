@@ -1,10 +1,10 @@
 #include "Matrix.hpp"
 
-Matrix::Matrix(const double& ecms, Random* random)
+myMatrix::myMatrix(const double& ecms, Random* random)
 : _ecms{ecms}, _ewparams{}, ran{random}
 {}
 
-double Matrix::ME2(const int& flav, const double& s, const double& t) const
+double myMatrix::ME2(const int& flav, const double& s, const double& t) const
 {
   const double ve {_ewparams.ae - 2. * _ewparams.qe * _ewparams.sin2tw};
   double qf{}, af{};
@@ -36,7 +36,7 @@ double Matrix::ME2(const int& flav, const double& s, const double& t) const
   return pow(4.*M_PI*_ewparams.alpha0,2) * 3.0 * (term1 + term2);
 }
 
-EventInfo Matrix::GeneratePoint()
+EventInfo myMatrix::GeneratePoint()
 {
   EventInfo evtinfo{};
   evtinfo.Particles.clear();
@@ -55,9 +55,9 @@ EventInfo Matrix::GeneratePoint()
                                -_ecms/2. * st * sin(phi),
                                -_ecms/2. * ct};
 
-  evtinfo.Particles.push_back({Rivet::PID::ELECTRON, -pa});
-  evtinfo.Particles.push_back({Rivet::PID::POSITRON, -pb});
-  const int fl { static_cast<int>(( 1 + 5 * (*ran)()))};
+  evtinfo.Particles.push_back({Rivet::PID::POSITRON, -pa});
+  evtinfo.Particles.push_back({Rivet::PID::ELECTRON, -pb});
+  const int fl {ran->randint()};
   evtinfo.Particles.push_back({fl, p1 ,std::make_pair<int,int>(1,0)});
   evtinfo.Particles.push_back({ -fl, p2,std::make_pair<int,int>(0,1)});
 

@@ -26,6 +26,32 @@ public:
   inline void SetMomentum(const Rivet::FourMomentum& fv) { _pd.first.second = fv; }
   inline void SetColour(const Colour& cl)                { _pd.second = cl; }
 
+  /// static members
+  /// Boost pb wrt to pa
+  inline static Rivet::FourMomentum Boost(const Rivet::FourMomentum& pa,
+                                          const Rivet::FourMomentum& pb)
+  {
+    double rsq {pa.mass()};
+    double v0 {(pa.E() * pb.E() - pa.px() * pb.px() - pa.py() * pb.py() - pa.pz() * pb.pz() )/rsq};
+    double c1 {(pb.E() + v0)/(rsq + pa.E())};
+    return Rivet::FourMomentum{v0,
+                               pb.px() - c1 * pa.px(),
+                               pb.py() - c1 * pa.py(),
+                               pb.pz() - c1 * pa.pz()};
+  }
+
+  inline static Rivet::FourMomentum BoostBack(const Rivet::FourMomentum& pa,
+                                              const Rivet::FourMomentum& pb)
+  {
+    double rsq {pa.mass()};
+    double v0 {(pa.E() * pb.E() + pa.px() * pb.px() + pa.py() * pb.py() + pa.pz() * pb.pz() )/rsq};
+    double c1 {(pb.E() + v0)/(rsq + pa.E())};
+    return Rivet::FourMomentum{v0,
+                               pb.px() + c1 * pa.px(),
+                               pb.py() + c1 * pa.py(),
+                               pb.pz() + c1 * pa.pz()};
+  }
+
   /// overloaded operators
   inline friend std::ostream &operator<<(std::ostream &os, const Particle &p)
   {

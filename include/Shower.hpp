@@ -11,6 +11,14 @@ struct DipoleInfo{
   Partons::iterator split, spect;
   std::vector<std::unique_ptr<class Kernels> >::iterator selected;
   double m2, zp;
+  inline friend std::ostream& operator<<(std::ostream& os, const DipoleInfo& di){
+    os << " Splitter  : " << *(di.split) << "\n"
+       << " Spectator : " << *(di.spect) << "\n"
+       << " Spllitng  : " << di.selected->get() << "\n"
+       << " m2 : " << di.m2 << "\n"
+       << " zp : " << di.zp;
+    return os;
+  }
 };
 
 class Shower

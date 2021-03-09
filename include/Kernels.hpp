@@ -35,7 +35,7 @@ public:
   ~Pqq() {}
   inline double Value(const double z, const double y) const override
   {
-    return QCD::CF * (2. / (1. - z *(1.-y)) - (1.+z));
+    return QCD::CF * (2./(1.-z*(1.-y))-(1.+z));
   }
 
   inline double Estimate(const double z) const override
@@ -61,7 +61,7 @@ public:
   ~Pgg() {}
   inline double Value(const double z, const double y) const override
   {
-    return QCD::CA /2. * (2./(1. -z*(1.-y)) -2. + z*(1.-z));
+    return QCD::CA /2. * (2./(1.-z*(1.-y))-2.+z*(1.-z));
   }
 
   inline double Estimate(const double z) const override
@@ -87,7 +87,7 @@ public:
   ~Pgq() {}
   inline double Value(const double z, const double y) const override
   {
-    return QCD::TR/2. * (1. - 2.*z*(1.-z));
+    return QCD::TR/2. *(1.-2.*z*(1.-z));
   }
 
   inline double Estimate(const double z) const override

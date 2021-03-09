@@ -34,7 +34,7 @@ struct EventInfo {
   }
 };
 
-class Matrix
+class myMatrix
 {
 private:
   EWParameters _ewparams;
@@ -42,8 +42,8 @@ private:
   Random* ran;
 
 public:
-  Matrix(const double& ecms, Random* random);
-  ~Matrix() {}
+  myMatrix(const double& ecms, Random* random);
+  ~myMatrix() {}
 
   double ME2(const int& flav, const double& s, const double& t) const;
   EventInfo GeneratePoint();

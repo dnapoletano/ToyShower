@@ -42,13 +42,14 @@ bool ToHepMCEvent(const EventInfo &evt, HepMC::GenEvent& hepevt)
 int main()
 {
   AlphaS alphaS{1, 91.1876, 0.118, 4.75, 1.3};
-  Random ran{0};
-  Matrix me{91.2, &ran};
+  Random ran{123456};
+  myMatrix me{91.2, &ran};
   Shower shower{&alphaS, &ran, 1.};
 
   Rivet::AnalysisHandler rivet;
   rivet.setIgnoreBeams(true);
-  rivet.addAnalyses({"ALEPH_2004_S5765862", "LL_JetRates"});
+  rivet.addAnalyses({"ALEPH_2004_S5765862", "JADE_OPAL_2000_S4300807",
+                     "OPAL_2004_S6132243", "LL_JetRates"});
 
   long int TotEvents{100000};
   double totalxs{0.0}, sumW{0.0}, sumW2{0.0}, err{0.0};
@@ -72,8 +73,9 @@ int main()
       std::cout << "\rEvent " << i <<  ", \u03c3 = "  << totalxs << " \u00B1 "
                 << err << " [pb] (" << 100. * err/totalxs << " %)" << std::flush;
   }
+
   totalxs = sumW/TotEvents;
-  err     = sqrt(abs(sumW2 / TotEvents - totalxs * totalxs) / (TotEvents -1));
+  err     = sqrt(abs(sumW2 / TotEvents - totalxs * totalxs) / (TotEvents - 1));
 
   const double wgtfract {rivet.sumW()/rivet.sumW()};
   const double rivetxs {rivet.nominalCrossSection()};
